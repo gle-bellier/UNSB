@@ -24,16 +24,24 @@ class UnalignedDataset(BaseDataset):
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseDataset.__init__(self, opt)
-        self.dir_A = os.path.join(opt.dataroot, opt.phase + 'A')  # create a path '/path/to/data/trainA'
-        self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')  # create a path '/path/to/data/trainB'
+        # self.dir_A = os.path.join(opt.dataroot, opt.phase + 'A')  # create a path '/path/to/data/trainA'
+        # self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')  # create a path '/path/to/data/trainB'
+        self.dir_A = os.path.join(
+            opt.dataroot, "domainA")  # create a path '/path/to/data/trainA'
+        self.dir_B = os.path.join(
+            opt.dataroot, "domainB")  # create a path '/path/to/data/trainB'
 
         if opt.phase == "test" and not os.path.exists(self.dir_A) \
            and os.path.exists(os.path.join(opt.dataroot, "valA")):
             self.dir_A = os.path.join(opt.dataroot, "valA")
             self.dir_B = os.path.join(opt.dataroot, "valB")
 
-        self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
-        self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
+        self.A_paths = sorted(make_dataset(
+            self.dir_A,
+            opt.max_dataset_size))  # load images from '/path/to/data/trainA'
+        self.B_paths = sorted(make_dataset(
+            self.dir_B,
+            opt.max_dataset_size))  # load images from '/path/to/data/trainB'
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
 
@@ -49,10 +57,11 @@ class UnalignedDataset(BaseDataset):
             A_paths (str)    -- image paths
             B_paths (str)    -- image paths
         """
-        A_path = self.A_paths[index % self.A_size]  # make sure index is within then range
-        if self.opt.serial_batches:   # make sure index is within then range
+        A_path = self.A_paths[
+            index % self.A_size]  # make sure index is within then range
+        if self.opt.serial_batches:  # make sure index is within then range
             index_B = index % self.B_size
-        else:   # randomize the index for domain B to avoid fixed pairs.
+        else:  # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
         A_img = Image.open(A_path).convert('RGB')
@@ -62,7 +71,9 @@ class UnalignedDataset(BaseDataset):
         # For CUT/FastCUT mode, if in finetuning phase (learning rate is decaying),
         # do not perform resize-crop data augmentation of CycleGAN.
         is_finetuning = self.opt.isTrain and self.current_epoch > self.opt.n_epochs
-        modified_opt = util.copyconf(self.opt, load_size=self.opt.crop_size if is_finetuning else self.opt.load_size)
+        modified_opt = util.copyconf(self.opt,
+                                     load_size=self.opt.crop_size
+                                     if is_finetuning else self.opt.load_size)
         transform = get_transform(modified_opt)
         A = transform(A_img)
         B = transform(B_img)
