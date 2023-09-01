@@ -45,6 +45,9 @@ class UnalignedDataset(BaseDataset):
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
 
+        print("Size of domain A", self.A_size)
+        print("Size of domain B", self.B_size)
+
     def __getitem__(self, index):
         """Return a data point and its metadata information.
 
